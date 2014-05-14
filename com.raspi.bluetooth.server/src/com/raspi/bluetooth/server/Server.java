@@ -1,21 +1,25 @@
 package com.raspi.bluetooth.server;
 
 import java.io.*;
+
 import javax.bluetooth.*;
 import javax.microedition.io.*;
 
 public class Server {
-	
-	 public final UUID uuid = new UUID("106d2780b38811e3a5e20800200c9a66",false);                              //the uid of the service, it has to be unique,
-			//	"27012f0c68af4fbf8dbe6bbaf7aa432a", false);          //it can be generated randomly
-	    public final String name = "Echo Server";                       //the name of the service
-	    public final String url  =  "btspp://localhost:" + uuid         //the service url
+
+	 public final UUID uuid = new UUID("106d2780b38811e3a5e20800200c9a68",false);                    
+		
+	    public final String name = "Echo Server";                       
+	    public final String url  =  "btspp://localhost:" + uuid         
 	                                + ";name=" + name 
 	                                + ";authenticate=false;encrypt=false;";
 	    LocalDevice local = null;
 	    StreamConnectionNotifier server = null;
 	    StreamConnection conn = null;
-
+	    FileWriter fw=null;
+	    BufferedWriter bw=null;
+	    DataInputStream din=null;
+	    BufferedReader bReader=null;
 	    public Server() {
 	        try {
 	            System.out.println("Setting device to be discoverable...");
@@ -26,26 +30,46 @@ public class Server {
 	            while(true){
 	            System.out.println("Waiting for incoming connection...");
 	            conn = server.acceptAndOpen();
+	           
+	            new Thread(){
+	            	public void run() {
+						
+					
 	            System.out.println("Client Connected...");
-	            DataInputStream din   = new DataInputStream(conn.openInputStream());
-	          /*  while(true){
-	                String cmd = "";
-	                char c;
-	                while (((c = din.readChar()) > 0) && (c!='\n') ){
-	                    cmd = cmd + c;
-	                }
-	                
-	                System.out.println("Received :" + cmd);
-	            }*/
+	            try {
+					din   = new DataInputStream(conn.openInputStream());
+				
+	          
+	            File file = new File("/home/pi/file.json");
+	            
+	            
+	            if (!file.exists()) {
+					file.createNewFile();
+				}else{
+					file.delete();
+					file.createNewFile();
+				}
+	            fw = new FileWriter(file.getAbsoluteFile());
+				bw = new BufferedWriter(fw);
+	            
+	            
 	            String cmd="";
-	            BufferedReader bReader=new BufferedReader(new InputStreamReader(din));
+	            bReader=new BufferedReader(new InputStreamReader(din));
 	           while(( cmd=bReader.readLine())!=null){
+	        	   bw.write(cmd+"\n");
 	            System.out.println(cmd);
 	           							}
+	           bw.close();
+	            } catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	}
+	            }.start();
+	           // execution du web service ave argument chemain du fichier : exec
 	            }
 	        } catch (Exception  e) {System.out.println("Exception Occured: " + e.toString());}
-	
-	
+
+
 
 }
 	    }
