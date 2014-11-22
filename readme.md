@@ -4,7 +4,7 @@ sudo apt-get upgrade
 sudo apt-get install bluetooth bluez-utils blueman
 
 ##Command Line Access(CLA)
-###status:
+###status
 /etc/init.d/bluetooth status
 ###Scan
 hcitool scan
